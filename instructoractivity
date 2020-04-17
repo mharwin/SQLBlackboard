@@ -1,0 +1,39 @@
+select
+ concat(lp.first_name, ' ', lp.last_name) as instructor,
+ lp.email,
+ lpc.course_id,
+ lc.course_number,
+  tm.name,
+ count(distinct lca.id) as course_accesses,
+ sum(lca.duration_sum)/60 as course_minutes,
+ sum(lca.interaction_cnt) as course_interactions
+from cdm_lms.person lp
+inner join cdm_lms.person_course lpc
+ on lpc.person_id = lp.id
+ and lpc.course_role = 'I' -- Instructor
+
+inner join cdm_lms.course_activity lca -- inner join to include only instructors with activity in the course
+
+ on lca.person_course_id = lpc.id
+
+inner join cdm_lms.course  lc
+ on lc.id = lpc.course_id
+ 
+inner join cdm_lms.term tm 
+on lc.term_id  = tm.id
+where tm.name in ('202010','202011','202012')
+group by
+
+ lp.first_name,
+
+ lp.last_name,
+
+ lp.email,
+
+ lpc.course_id,
+ 
+ lc.course_number,
+ 
+ tm.name
+
+order by instructor, course_id,tm.name 
